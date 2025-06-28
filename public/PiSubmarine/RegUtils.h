@@ -127,7 +127,8 @@ namespace PiSubmarine::RegUtils
 	{
 		static_assert(BytesOutNum + ByteOffset <= BytesInNum);
 
-		std::array<uint8_t, BytesOutNum> result{ 0 };
+		std::vector<uint8_t> result;
+		result.resize(BytesOutNum);
 		for (size_t i = 0; i < BytesOutNum; i++)
 		{
 			result[i] = bytes[ByteOffset + i];
