@@ -336,7 +336,7 @@ namespace PiSubmarine::RegUtils
 	struct FieldReadable : public FieldBase<TFieldType, RegisterSize, endianness>
 	{
 		FieldReadable(std::array<uint8_t, RegisterSize>& data) :
-			FieldBase<TFieldType, RegisterSize>(data)
+			FieldBase<TFieldType, RegisterSize, endianness>(data)
 		{
 
 		}
