@@ -225,7 +225,7 @@ namespace PiSubmarine::RegUtils
 		std::array<uint8_t, Size> Data{ 0 };
 	};
 
-	enum class RegisterType : uint8_t
+	enum class Access : uint8_t
 	{
 		Read = (1 << 0),
 		Write = (1 << 1)
