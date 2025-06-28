@@ -378,7 +378,7 @@ namespace PiSubmarine::RegUtils
 		}
 	};
 
-	template<typename TFieldType, size_t Offset, size_t BitLength, Access Access, size_t RegisterSize>
+	template<typename TFieldType, size_t Offset, size_t BitLength, Access Access, size_t RegisterSize, std::endian endianness = std::endian::native>
 	struct Field :
 		public std::conditional<
 		HasAnyFlag(Access, Access::ReadWrite),
