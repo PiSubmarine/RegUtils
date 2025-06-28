@@ -382,15 +382,15 @@ namespace PiSubmarine::RegUtils
 	struct Field :
 		public std::conditional<
 		HasAnyFlag(Access, Access::ReadWrite),
-		FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
-		FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
+		FieldWritable<TFieldType, Offset, BitLength, RegisterSize, endianness>,
+		FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
 		>::type
 	{
 		constexpr Field(std::array<uint8_t, RegisterSize>& data) :
 			std::conditional<
 			HasAnyFlag(Access, Access::ReadWrite),
-			FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
-			FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
+			FieldWritable<TFieldType, Offset, BitLength, RegisterSize, endianness>,
+			FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
 			>::type(data)
 		{
 
