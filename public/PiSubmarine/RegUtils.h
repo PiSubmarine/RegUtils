@@ -57,17 +57,18 @@ namespace PiSubmarine::RegUtils
 
 
 	template<typename T, size_t BytesNum>
-	constexpr T ReadIntReversed(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
+	constexpr T ReadIntInverseByteOrder(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
 		T result = 0;
+		size_t byteMax = Num / 8;
 		for (size_t i = 0; i < Num; i++)
 		{
 			size_t bitIndex = Start + i;
 			size_t byteIndex = bitIndex / 8;
 			size_t bitIndexRem = bitIndex % 8;
-			if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
+			if ((bytes[byteMax - byteIndex] & (1 << bitIndexRem)) != 0)
 			{
-				result |= (1ULL << (Num - i - 1));
+				result |= (1ULL << i);
 			}
 		}
 		return result;
@@ -93,7 +94,7 @@ namespace PiSubmarine::RegUtils
 		}
 		else
 		{
-			return ReadIntReversed<T, BytesNum>(bytes, Start, Num);
+			return ReadIntInverseByteOrder<T, BytesNum>(bytes, Start, Num);
 		}
 	}
 
@@ -155,6 +156,26 @@ namespace PiSubmarine::RegUtils
 		}
 	}
 
+	template<typename T, size_t BytesNum>
+	constexpr void WriteIntInverseByteOrder(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
+	{
+		size_t byteMax = Num / 8;
+		for (size_t i = 0; i < Num; i++)
+		{
+			size_t bitIndex = Start + i;
+			size_t byteIndex = bitIndex / 8;
+			size_t bitIndexRem = bitIndex % 8;
+			if ((value & (1ULL << i)) != 0)
+			{
+				bytes[byteMax - byteIndex] |= (1 << bitIndexRem);
+			}
+			else
+			{
+				bytes[byteMax - byteIndex] &= ~(1 << bitIndexRem);
+			}
+		}
+	}
+
 	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr void WriteInt(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
@@ -177,26 +198,7 @@ namespace PiSubmarine::RegUtils
 		}
 		else
 		{
-
-		}
-	}
-
-	template<typename T, size_t BytesNum>
-	constexpr void WriteIntReversed(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
-	{
-		for (size_t i = 0; i < Num; i++)
-		{
-			size_t bitIndex = Start + i;
-			size_t byteIndex = bitIndex / 8;
-			size_t bitIndexRem = bitIndex % 8;
-			if ((value & (1ULL << i)) != 0)
-			{
-				bytes[Num - byteIndex - 1] |= (1 << bitIndexRem);
-			}
-			else
-			{
-				bytes[Num - byteIndex - 1] &= ~(1 << bitIndexRem);
-			}
+			WriteIntInverseByteOrder<T, BytesNum>(value, bytes, Start, Num);
 		}
 	}
 
