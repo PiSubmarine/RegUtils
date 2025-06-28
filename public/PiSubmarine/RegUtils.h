@@ -230,6 +230,16 @@ namespace PiSubmarine::RegUtils
 			return Register(regBytes);
 		}
 
+		constexpr auto GetOffsetAndData() const
+		{
+			std::array<uint8_t, sizeof(Offset) + Size> bytes{ 0 };
+
+			WriteInt(Offset, bytes, 0, sizeof(Offset) * 8);
+			WriteBytes(Data, bytes, sizeof(Offset));
+
+			return bytes;
+		}
+
 		constexpr const std::array<uint8_t, Size>& GetRegisterByteArray() const
 		{
 			return Data;
