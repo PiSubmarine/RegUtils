@@ -356,7 +356,7 @@ namespace PiSubmarine::RegUtils
 	struct FieldWritable : public FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
 	{
 		FieldWritable(std::array<uint8_t, RegisterSize>& data) :
-			FieldReadable<TFieldType, Offset, BitLength, RegisterSize>(data)
+			FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>(data)
 		{
 
 		}
