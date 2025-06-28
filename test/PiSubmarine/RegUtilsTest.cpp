@@ -142,10 +142,11 @@ namespace PiSubmarine::RegUtils
 		EXPECT_TRUE(HasAnyFlag(val1, val2));
 	}
 
-	TEST(RegisterTest, FromByteArray)
+	TEST(RegisterTest, FromByteArrayTest)
 	{
 		std::array<uint8_t, 49> byteArray{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		Register<3, 3> reg = Register<3, 3>::FromByteArray(byteArray);
+		Register<3, 3> reg;
+		FromByteArray(reg, byteArray);
 		ASSERT_EQ(reg.GetRegisterByteArray()[0], 3);
 		ASSERT_EQ(reg.GetRegisterByteArray()[1], 4);
 		ASSERT_EQ(reg.GetRegisterByteArray()[2], 5);

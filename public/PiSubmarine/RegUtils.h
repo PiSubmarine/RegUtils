@@ -196,6 +196,13 @@ namespace PiSubmarine::RegUtils
 		return TReg(arr);
 	}
 
+	template<typename TReg, size_t ArraySize>
+	static void FromByteArray(TReg& reg, const std::array<uint8_t, ArraySize>& byteArray)
+	{
+		std::array<uint8_t, reg.GetSize()> regBytes{0};
+		memcpy(reg.GetRegisterByteArray().data(), byteArray.data() + reg.GetOffset(), reg.GetSize());
+	}
+
 	template<auto Offset, size_t Size>
 	struct Register
 	{
@@ -256,6 +263,11 @@ namespace PiSubmarine::RegUtils
 		}
 
 		constexpr const std::array<uint8_t, Size>& GetRegisterByteArray() const
+		{
+			return Data;
+		}
+
+		constexpr std::array<uint8_t, Size>& GetRegisterByteArray()
 		{
 			return Data;
 		}
