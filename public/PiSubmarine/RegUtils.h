@@ -233,20 +233,21 @@ namespace PiSubmarine::RegUtils
 
 		constexpr auto GetOffsetAndData() const
 		{
+			constexpr size_t offsetInt = static_cast<size_t>(Offset);
 			std::array<uint8_t, sizeof(Offset) + Size> bytes{ 0 };
 
 			if constexpr (std::endian::native == std::endian::little)
 			{
 				for (size_t i = 0; i < sizeof(Offset); i++)
 				{
-					bytes[sizeof(Offset) - i - 1] = Offset >> (i * 8);
+					bytes[sizeof(Offset) - i - 1] = offsetInt >> (i * 8);
 				}
 			}
 			else
 			{
 				for (size_t i = 0; i < sizeof(Offset); i++)
 				{
-					bytes[i] = Offset >> (i * 8);
+					bytes[i] = offsetInt >> (i * 8);
 				}
 			}
 			WriteBytes(Data, bytes, sizeof(Offset));
