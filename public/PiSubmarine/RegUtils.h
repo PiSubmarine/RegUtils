@@ -44,6 +44,16 @@ namespace PiSubmarine::RegUtils
 	}
 
 	template<typename T, size_t BytesNum>
+	constexpr std::make_signed_t<T> ConvertTwosComplement(T unsignedValue)
+	{
+		if (unsignedValue & (1 << (sizeof(T) * 8 - 1)))
+		{
+			unsignedValue |= (~0u << sizeof(T) * 8);
+		}
+		return static_cast<std::make_signed_t<T>>(unsignedValue);
+	}
+
+	template<typename T, size_t BytesNum>
 	constexpr T ReadInt(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
 		T result = 0;
