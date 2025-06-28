@@ -146,8 +146,8 @@ namespace PiSubmarine::RegUtils
 	{
 		std::array<uint8_t, 49> byteArray{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		Register<3, 3> reg = Register<3, 3>::FromByteArray(byteArray);
-		ASSERT_EQ(reg.GetData()[0], 3);
-		ASSERT_EQ(reg.GetData()[1], 4);
-		ASSERT_EQ(reg.GetData()[2], 5);
+		ASSERT_EQ(reg.GetRegisterByteArray()[0], 3);
+		ASSERT_EQ(reg.GetRegisterByteArray()[1], 4);
+		ASSERT_EQ(reg.GetRegisterByteArray()[2], 5);
 	}
 }

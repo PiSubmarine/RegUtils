@@ -230,7 +230,7 @@ namespace PiSubmarine::RegUtils
 			return Register(regBytes);
 		}
 
-		constexpr const std::array<uint8_t, Size>& GetData() const
+		constexpr const std::array<uint8_t, Size>& GetRegisterByteArray() const
 		{
 			return Data;
 		}
