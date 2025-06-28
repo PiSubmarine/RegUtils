@@ -3,7 +3,7 @@
 
 namespace PiSubmarine::RegUtils
 {
-	TEST(ReadIntTest, Test1)
+	TEST(ReadIntTest, Native)
 	{
 		constexpr std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
 
@@ -15,6 +15,20 @@ namespace PiSubmarine::RegUtils
 
 		uint8_t val3 = ReadInt<uint8_t, 5>(bytes, 12, 6);
 		EXPECT_EQ(val3, 0b111010);
+	}
+
+	TEST(ReadIntTest, Inverse)
+	{
+		constexpr std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
+
+		constexpr uint8_t val1 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 0, 4);
+		EXPECT_EQ(val1, 0b0001);
+
+		uint8_t val2 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 1, 5);
+		EXPECT_EQ(val2, 0b00110);
+
+		uint8_t val3 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 12, 6);
+		EXPECT_EQ(val3, 0b010111);
 	}
 
 	TEST(WriteIntTest, Test1)

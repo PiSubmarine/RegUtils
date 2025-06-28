@@ -55,22 +55,6 @@ namespace PiSubmarine::RegUtils
 		return static_cast<std::make_signed_t<T>>(unsignedValue);
 	}
 
-	template<typename T, size_t BytesNum>
-	constexpr T ReadInt(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
-	{
-		T result = 0;
-		for (size_t i = 0; i < Num; i++)
-		{
-			size_t bitIndex = Start + i;
-			size_t byteIndex = bitIndex / 8;
-			size_t bitIndexRem = bitIndex % 8;
-			if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
-			{
-				result |= (1ULL << i);
-			}
-		}
-		return result;
-	}
 
 	template<typename T, size_t BytesNum>
 	constexpr T ReadIntReversed(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
@@ -89,26 +73,50 @@ namespace PiSubmarine::RegUtils
 		return result;
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
+	constexpr T ReadInt(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
+	{
+		if constexpr (endianness == std::endian::native)
+		{
+			T result = 0;
+			for (size_t i = 0; i < Num; i++)
+			{
+				size_t bitIndex = Start + i;
+				size_t byteIndex = bitIndex / 8;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
+				{
+					result |= (1ULL << i);
+				}
+			}
+			return result;
+		}
+		else
+		{
+			return ReadIntReversed<T, BytesNum>(bytes, Start, Num);
+		}
+	}
+
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr T ReadEnum(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
 		using U = std::underlying_type_t<T>;
-		U result = ReadInt<U, BytesNum>(bytes, Start, Num);
+		U result = ReadInt<U, BytesNum, endianness>(bytes, Start, Num);
 		return static_cast<T>(result);
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr typename std::enable_if<std::is_enum<T>::value, T>::type
 		Read(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		return ReadEnum<T, BytesNum>(bytes, Start, Num);
+		return ReadEnum<T, BytesNum, endianness>(bytes, Start, Num);
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr typename std::enable_if<!std::is_enum<T>::value, T>::type
 		Read(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		return ReadInt<T, BytesNum>(bytes, Start, Num);
+		return ReadInt<T, BytesNum, endianness>(bytes, Start, Num);
 	}
 
 	template<size_t BytesOutNum, size_t ByteOffset, size_t BytesInNum>
@@ -147,8 +155,34 @@ namespace PiSubmarine::RegUtils
 		}
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr void WriteInt(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
+	{
+		if constexpr (endianness == std::endian::native)
+		{
+			for (size_t i = 0; i < Num; i++)
+			{
+				size_t bitIndex = Start + i;
+				size_t byteIndex = bitIndex / 8;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((value & (1ULL << i)) != 0)
+				{
+					bytes[byteIndex] |= (1 << bitIndexRem);
+				}
+				else
+				{
+					bytes[byteIndex] &= ~(1 << bitIndexRem);
+				}
+			}
+		}
+		else
+		{
+
+		}
+	}
+
+	template<typename T, size_t BytesNum>
+	constexpr void WriteIntReversed(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
 		for (size_t i = 0; i < Num; i++)
 		{
@@ -157,16 +191,16 @@ namespace PiSubmarine::RegUtils
 			size_t bitIndexRem = bitIndex % 8;
 			if ((value & (1ULL << i)) != 0)
 			{
-				bytes[byteIndex] |= (1 << bitIndexRem);
+				bytes[Num - byteIndex - 1] |= (1 << bitIndexRem);
 			}
 			else
 			{
-				bytes[byteIndex] &= ~(1 << bitIndexRem);
+				bytes[Num - byteIndex - 1] &= ~(1 << bitIndexRem);
 			}
 		}
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr void WriteEnum(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
 		using U = std::underlying_type_t<T>;
@@ -174,18 +208,18 @@ namespace PiSubmarine::RegUtils
 		WriteInt(valueInt, bytes, Start, Num);
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr typename std::enable_if<std::is_enum<T>::value, void>::type
 		Write(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		WriteEnum<T, BytesNum>(value, bytes, Start, Num);
+		WriteEnum<T, BytesNum, endianness>(value, bytes, Start, Num);
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr typename std::enable_if<!std::is_enum<T>::value, void>::type
 		Write(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		WriteInt<T, BytesNum>(value, bytes, Start, Num);
+		WriteInt<T, BytesNum, endianness>(value, bytes, Start, Num);
 	}
 
 	template<typename TReg, typename TContainer>
@@ -283,7 +317,7 @@ namespace PiSubmarine::RegUtils
 		ReadWrite = 1
 	};
 
-	template<typename TFieldType, size_t RegisterSize>
+	template<typename TFieldType, size_t RegisterSize, std::endian endianness = std::endian::native>
 	struct FieldBase
 	{
 		FieldBase(std::array<uint8_t, RegisterSize>& data) :
@@ -298,8 +332,8 @@ namespace PiSubmarine::RegUtils
 		std::array<uint8_t, RegisterSize>& RegisterData;
 	};
 
-	template<typename TFieldType, size_t Offset, size_t BitLength, size_t RegisterSize>
-	struct FieldReadable : public FieldBase<TFieldType, RegisterSize>
+	template<typename TFieldType, size_t Offset, size_t BitLength, size_t RegisterSize, std::endian endianness = std::endian::native>
+	struct FieldReadable : public FieldBase<TFieldType, RegisterSize, endianness>
 	{
 		FieldReadable(std::array<uint8_t, RegisterSize>& data) :
 			FieldBase<TFieldType, RegisterSize>(data)
@@ -309,7 +343,7 @@ namespace PiSubmarine::RegUtils
 
 		constexpr TFieldType Get() const
 		{
-			return Read<TFieldType>(FieldBase<TFieldType, RegisterSize>::RegisterData, Offset, BitLength);
+			return Read<TFieldType>(FieldBase<TFieldType, RegisterSize, endianness>::RegisterData, Offset, BitLength);
 		}
 
 		constexpr operator TFieldType() const
@@ -318,8 +352,8 @@ namespace PiSubmarine::RegUtils
 		}
 	};
 
-	template<typename TFieldType, size_t Offset, size_t BitLength, size_t RegisterSize>
-	struct FieldWritable : public FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
+	template<typename TFieldType, size_t Offset, size_t BitLength, size_t RegisterSize, std::endian endianness = std::endian::native>
+	struct FieldWritable : public FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
 	{
 		FieldWritable(std::array<uint8_t, RegisterSize>& data) :
 			FieldReadable<TFieldType, Offset, BitLength, RegisterSize>(data)
@@ -329,7 +363,7 @@ namespace PiSubmarine::RegUtils
 
 		void Set(TFieldType value)
 		{
-			Write<TFieldType>(value, FieldBase<TFieldType, RegisterSize>::RegisterData, Offset, BitLength);
+			Write<TFieldType, endianness>(value, FieldBase<TFieldType, RegisterSize>::RegisterData, Offset, BitLength);
 		}
 
 		constexpr operator TFieldType() const
