@@ -343,7 +343,7 @@ namespace PiSubmarine::RegUtils
 
 		constexpr TFieldType Get() const
 		{
-			return Read<TFieldType>(FieldBase<TFieldType, RegisterSize, endianness>::RegisterData, Offset, BitLength);
+			return Read<TFieldType, RegisterSize, endianness>(FieldBase<TFieldType, RegisterSize, endianness>::RegisterData, Offset, BitLength);
 		}
 
 		constexpr operator TFieldType() const
