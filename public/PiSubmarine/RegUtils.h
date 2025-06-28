@@ -159,6 +159,10 @@ namespace PiSubmarine::RegUtils
 			{
 				bytes[byteIndex] |= (1 << bitIndexRem);
 			}
+			else
+			{
+				bytes[byteIndex] &= ~(1 << bitIndexRem);
+			}
 		}
 	}
 
