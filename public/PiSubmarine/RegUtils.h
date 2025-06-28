@@ -43,7 +43,7 @@ namespace PiSubmarine::RegUtils
 		return (A & B) != static_cast<T>(0);
 	}
 
-	template<typename T, size_t BytesNum>
+	template<typename T>
 	constexpr std::make_signed_t<T> ConvertTwosComplement(T unsignedValue)
 	{
 		if (unsignedValue & (1 << (sizeof(T) * 8 - 1)))
