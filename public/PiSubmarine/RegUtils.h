@@ -183,9 +183,14 @@ namespace PiSubmarine::RegUtils
 		return TReg(arr);
 	}
 
-	template<size_t Size>
+	template<size_t Offset, size_t Size>
 	struct Register
 	{
+		constexpr static size_t GetOffset()
+		{
+			return Offset;
+		}
+
 		constexpr static size_t GetSize()
 		{
 			return Size;
@@ -201,7 +206,7 @@ namespace PiSubmarine::RegUtils
 
 		}
 
-		constexpr Register(const Register<Size>& other) : Data(other.Data)
+		constexpr Register(const Register<Offset, Size>& other) : Data(other.Data)
 		{
 
 		}
