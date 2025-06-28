@@ -363,12 +363,12 @@ namespace PiSubmarine::RegUtils
 
 		void Set(TFieldType value)
 		{
-			Write<TFieldType, RegisterSize, endianness>(value, FieldBase<TFieldType, RegisterSize>::RegisterData, Offset, BitLength);
+			Write<TFieldType, RegisterSize, endianness>(value, FieldBase<TFieldType, RegisterSize, endianness>::RegisterData, Offset, BitLength);
 		}
 
 		constexpr operator TFieldType() const
 		{
-			return FieldReadable<TFieldType, Offset, BitLength, RegisterSize>::Get();
+			return FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>::Get();
 		}
 
 		FieldWritable& operator=(const TFieldType& value)
