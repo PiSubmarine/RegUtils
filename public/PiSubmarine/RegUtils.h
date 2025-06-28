@@ -235,8 +235,8 @@ namespace PiSubmarine::RegUtils
 
 	enum class Access : uint8_t
 	{
-		Read = (1 << 0),
-		Write = (1 << 1)
+		Read = 0,
+		ReadWrite = 1
 	};
 
 	template<typename TFieldType, size_t RegisterSize>
@@ -303,19 +303,21 @@ namespace PiSubmarine::RegUtils
 	template<typename TFieldType, size_t Offset, size_t BitLength, Access Access, size_t RegisterSize>
 	struct Field :
 		public std::conditional<
-		HasAnyFlag(Access, Access::Write),
+		HasAnyFlag(Access, Access::ReadWrite),
 		FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
 		FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
 		>::type
 	{
 		constexpr Field(std::array<uint8_t, RegisterSize>& data) :
 			std::conditional<
-			HasAnyFlag(Access, Access::Write),
+			HasAnyFlag(Access, Access::ReadWrite),
 			FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
 			FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
 			>::type(data)
 		{
 
 		}
+
+
 	};
 }
