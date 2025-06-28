@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <string.h>
 #include <bit>
+#include <vector>
 
 namespace PiSubmarine::RegUtils
 {
