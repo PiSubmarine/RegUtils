@@ -292,17 +292,17 @@ namespace PiSubmarine::RegUtils
 		}
 	};
 
-	template<typename TFieldType, size_t Offset, size_t BitLength, RegisterType Access, size_t RegisterSize>
+	template<typename TFieldType, size_t Offset, size_t BitLength, Access Access, size_t RegisterSize>
 	struct Field :
 		public std::conditional<
-		HasAnyFlag(Access, RegisterType::Write),
+		HasAnyFlag(Access, Access::Write),
 		FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
 		FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
 		>::type
 	{
 		constexpr Field(std::array<uint8_t, RegisterSize>& data) :
 			std::conditional<
-			HasAnyFlag(Access, RegisterType::Write),
+			HasAnyFlag(Access, Access::Write),
 			FieldWritable<TFieldType, Offset, BitLength, RegisterSize>,
 			FieldReadable<TFieldType, Offset, BitLength, RegisterSize>
 			>::type(data)
