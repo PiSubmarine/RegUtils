@@ -4,6 +4,7 @@
 #include <array>
 #include <type_traits>
 #include <string.h>
+#include <bit>
 
 namespace PiSubmarine::RegUtils
 {
@@ -234,7 +235,20 @@ namespace PiSubmarine::RegUtils
 		{
 			std::array<uint8_t, sizeof(Offset) + Size> bytes{ 0 };
 
-			WriteInt(Offset, bytes, 0, sizeof(Offset) * 8);
+			if constexpr (std::endian::native == std::endian::little)
+			{
+				for (size_t i = 0; i < sizeof(Offset); i++)
+				{
+					bytes[sizeof(Offset) - i - 1] = Offset >> (i * 8);
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < sizeof(Offset); i++)
+				{
+					bytes[i] = Offset >> (i * 8);
+				}
+			}
 			WriteBytes(Data, bytes, sizeof(Offset));
 
 			return bytes;

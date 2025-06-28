@@ -161,6 +161,18 @@ namespace PiSubmarine::RegUtils
 		ASSERT_EQ(bytes[1], 1);
 		ASSERT_EQ(bytes[2], 2);
 		ASSERT_EQ(bytes[3], 3);
+	}
 
+	TEST(RegisterTest, GetOffsetAndData16bits)
+	{
+		constexpr uint16_t Offset = 0xABCD;
+		Register<Offset, 3> reg = std::array<uint8_t, 3>{ 1, 2, 3 };
+		auto bytes = reg.GetOffsetAndData();
+		ASSERT_EQ(bytes.size(), 5);
+		ASSERT_EQ(bytes[0], 0xAB);
+		ASSERT_EQ(bytes[1], 0xCD);
+		ASSERT_EQ(bytes[2], 1);
+		ASSERT_EQ(bytes[3], 2);
+		ASSERT_EQ(bytes[4], 3);
 	}
 }
