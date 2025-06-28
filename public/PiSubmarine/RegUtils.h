@@ -199,7 +199,6 @@ namespace PiSubmarine::RegUtils
 	template<typename TReg, size_t ArraySize>
 	static void ReadRegister(TReg& reg, const std::array<uint8_t, ArraySize>& byteArray)
 	{
-		std::array<uint8_t, reg.GetSize()> regBytes{0};
 		memcpy(reg.GetRegisterByteArray().data(), byteArray.data() + reg.GetOffset(), reg.GetSize());
 	}
 
