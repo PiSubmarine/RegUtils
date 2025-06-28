@@ -197,7 +197,7 @@ namespace PiSubmarine::RegUtils
 	}
 
 	template<typename TReg, size_t ArraySize>
-	static void FromByteArray(TReg& reg, const std::array<uint8_t, ArraySize>& byteArray)
+	static void ReadRegister(TReg& reg, const std::array<uint8_t, ArraySize>& byteArray)
 	{
 		std::array<uint8_t, reg.GetSize()> regBytes{0};
 		memcpy(reg.GetRegisterByteArray().data(), byteArray.data() + reg.GetOffset(), reg.GetSize());
@@ -229,14 +229,6 @@ namespace PiSubmarine::RegUtils
 		constexpr Register(const Register<Offset, Size>& other) : Data(other.Data)
 		{
 
-		}
-
-		template<size_t ArraySize>
-		static Register<Offset, Size> FromByteArray(const std::array<uint8_t, ArraySize>& byteArray)
-		{
-			std::array<uint8_t, Size> regBytes{ 0 };
-			memcpy(regBytes.data(), byteArray.data() + GetOffset(), GetSize());
-			return Register(regBytes);
 		}
 
 		constexpr auto GetOffsetAndData() const
