@@ -211,6 +211,14 @@ namespace PiSubmarine::RegUtils
 
 		}
 
+		template<size_t ArraySize>
+		static Register<Offset, Size> FromByteArray(const std::array<uint8_t, ArraySize>& byteArray)
+		{
+			std::array<uint8_t, Size> regBytes{ 0 };
+			memcpy(regBytes.data(), byteArray.data() + GetOffset(), GetSize());
+			return Register(regBytes);
+		}
+
 		constexpr const std::array<uint8_t, Size>& GetInternalBuffer() const
 		{
 			return Data;
