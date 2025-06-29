@@ -120,26 +120,24 @@ namespace PiSubmarine::RegUtils
 	template<typename T, std::endian endianness = std::endian::native>
 	void WriteInt(T value, uint8_t* bytes, size_t Start, size_t Num)
 	{
-		if constexpr (endianness == std::endian::native)
+		if constexpr (endianness != std::endian::native)
 		{
-			for (size_t i = 0; i < Num; i++)
-			{
-				size_t bitIndex = Start + i;
-				size_t byteIndex = bitIndex / 8;
-				size_t bitIndexRem = bitIndex % 8;
-				if ((value & (1ULL << i)) != 0)
-				{
-					bytes[byteIndex] |= (1 << bitIndexRem);
-				}
-				else
-				{
-					bytes[byteIndex] &= ~(1 << bitIndexRem);
-				}
-			}
+			value = Byteswap(value);
 		}
-		else
+
+		for (size_t i = 0; i < Num; i++)
 		{
-			// TODO
+			size_t bitIndex = Start + i;
+			size_t byteIndex = bitIndex / 8;
+			size_t bitIndexRem = bitIndex % 8;
+			if ((value & (1ULL << i)) != 0)
+			{
+				bytes[byteIndex] |= (1 << bitIndexRem);
+			}
+			else
+			{
+				bytes[byteIndex] &= ~(1 << bitIndexRem);
+			}
 		}
 	}
 
