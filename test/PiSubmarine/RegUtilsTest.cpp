@@ -24,21 +24,24 @@ namespace PiSubmarine::RegUtils
 		uint8_t val1 = ReadInt<uint8_t, std::endian::big>(bytes.data(), 24, 8);
 		EXPECT_EQ(val1, 0x2C);
 
-		uint8_t val2a = ReadInt<uint8_t, std::endian::little>(bytes.data(), 25, 7);
-		EXPECT_EQ(val2a, 22);
+		uint8_t val2a = ReadInt<uint8_t, std::endian::big>(bytes.data(), 25, 7);
+		EXPECT_EQ(val2a, 0x2C);
 
 		uint8_t val2b = ReadInt<uint8_t, std::endian::big>(bytes.data(), 25, 7);
-		EXPECT_EQ(val2b, 22);
+		EXPECT_EQ(val2b, 0x2C);
 
 		uint16_t val3a = ReadInt<uint16_t, std::endian::big>(bytes.data(), 16, 9);
-		EXPECT_EQ(val3a, 0x01CD);
+		EXPECT_EQ(val3a, 0x012C);
+	}
 
-		uint16_t val3b = ReadInt<uint16_t, std::endian::little>(bytes.data(), 16, 9);
-		EXPECT_EQ(val3b, 0x1CD);
+	TEST(WriteIntTest, InverseByteOrder)
+	{
+		std::array<uint8_t, 5> bytes{ 0xFF, 0xFF, 0xF0, 0x00, 0xFF };
+		constexpr std::array<uint8_t, 5> bytesExpected{ 0xFF, 0xFF, 0xF1, 0x2C, 0xFF };
 
-		uint32_t val4 = ReadInt<uint32_t, std::endian::big>(bytes.data(), 9, 18);
-		EXPECT_EQ(val4, 0x3FE6F);
+		WriteInt<uint16_t, std::endian::big>(0x012C, bytes.data(), 16, 9);
 
+		EXPECT_EQ(bytes, bytesExpected);
 	}
 
 	TEST(WriteIntTest, Test1)

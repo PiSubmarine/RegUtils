@@ -76,20 +76,40 @@ namespace PiSubmarine::RegUtils
 	T ReadInt(const uint8_t* bytes, size_t Start, size_t Num)
 	{
 		T result = 0;
-		for (size_t i = 0; i < Num; i++)
+
+		if constexpr (endianness == std::endian::little)
 		{
-			size_t bitIndex = Start + i;
-			size_t byteIndex = bitIndex / 8;
-			size_t bitIndexRem = bitIndex % 8;
-			if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
+			for (size_t i = 0; i < Num; i++)
 			{
-				result |= (1ULL << i);
+				size_t bitIndex = Start + i;
+				size_t byteIndex = bitIndex / 8;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
+				{
+					result |= (1ULL << i);
+				}
 			}
 		}
-
-		if constexpr (endianness != std::endian::native)
+		else
 		{
-			result = Byteswap(result);
+			size_t bytesNum = Num / 8;
+			if (Num % 8)
+			{
+				bytesNum++;
+			}
+
+			const uint8_t* targetBytes = bytes + Start / 8;
+
+			for (size_t i = 0; i < Num; i++)
+			{
+				size_t bitIndex = i;
+				size_t byteIndex = bytesNum - bitIndex / 8 - 1;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((targetBytes[byteIndex] & (1 << bitIndexRem)) != 0)
+				{
+					result |= (1ULL << i);
+				}
+			}
 		}
 
 		return result;
@@ -120,23 +140,46 @@ namespace PiSubmarine::RegUtils
 	template<typename T, std::endian endianness = std::endian::native>
 	void WriteInt(T value, uint8_t* bytes, size_t Start, size_t Num)
 	{
-		if constexpr (endianness != std::endian::native)
+		if constexpr (endianness == std::endian::little)
 		{
-			value = Byteswap(value);
-		}
-
-		for (size_t i = 0; i < Num; i++)
-		{
-			size_t bitIndex = Start + i;
-			size_t byteIndex = bitIndex / 8;
-			size_t bitIndexRem = bitIndex % 8;
-			if ((value & (1ULL << i)) != 0)
+			for (size_t i = 0; i < Num; i++)
 			{
-				bytes[byteIndex] |= (1 << bitIndexRem);
+				size_t bitIndex = Start + i;
+				size_t byteIndex = bitIndex / 8;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((value & (1ULL << i)) != 0)
+				{
+					bytes[byteIndex] |= (1 << bitIndexRem);
+				}
+				else
+				{
+					bytes[byteIndex] &= ~(1 << bitIndexRem);
+				}
 			}
-			else
+		}
+		else
+		{
+			size_t bytesNum = Num / 8;
+			if (Num % 8)
 			{
-				bytes[byteIndex] &= ~(1 << bitIndexRem);
+				bytesNum++;
+			}
+
+			uint8_t* targetBytes = bytes + Start / 8;
+
+			for (size_t i = 0; i < Num; i++)
+			{
+				size_t bitIndex = i;
+				size_t byteIndex = bytesNum - bitIndex / 8 - 1;
+				size_t bitIndexRem = bitIndex % 8;
+				if ((value & (1ULL << i)) != 0)
+				{
+					targetBytes[byteIndex] |= (1 << bitIndexRem);
+				}
+				else
+				{
+					targetBytes[byteIndex] &= ~(1 << bitIndexRem);
+				}
 			}
 		}
 	}
