@@ -17,18 +17,28 @@ namespace PiSubmarine::RegUtils
 		EXPECT_EQ(val3, 0b111010);
 	}
 
-	TEST(ReadIntTest, Inverse)
+	TEST(ReadIntTest, InverseByteOrder)
 	{
-		constexpr std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
+		constexpr std::array<uint8_t, 5> bytes{ 0xFF, 0xFF, 0xCD, 0x2C, 0xFF };
 
-		constexpr uint8_t val1 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 0, 4);
-		EXPECT_EQ(val1, 0b0001);
+		constexpr uint8_t val1 = ReadInt<uint8_t, bytes.size(), std::endian::big>(bytes, 24, 8);
+		EXPECT_EQ(val1, 0x2C);
 
-		uint8_t val2 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 1, 5);
-		EXPECT_EQ(val2, 0b00110);
+		constexpr uint8_t val2a = ReadInt<uint8_t, bytes.size(), std::endian::little>(bytes, 25, 7);
+		EXPECT_EQ(val2a, 22);
 
-		uint8_t val3 = ReadInt<uint8_t, 5, std::endian::big>(bytes, 12, 6);
-		EXPECT_EQ(val3, 0b010111);
+		constexpr uint8_t val2b = ReadInt<uint8_t, bytes.size(), std::endian::big>(bytes, 25, 7);
+		EXPECT_EQ(val2b, 22);
+
+		constexpr uint16_t val3a = ReadInt<uint16_t, bytes.size(), std::endian::big>(bytes, 16, 9);
+		EXPECT_EQ(val3a, 0x01CD);
+
+		constexpr uint16_t val3b = ReadInt<uint16_t, bytes.size(), std::endian::little>(bytes, 16, 9);
+		EXPECT_EQ(val3b, 0x1CD);
+
+		constexpr uint32_t val4 = ReadInt<uint32_t, 5, std::endian::big>(bytes, 9, 18);
+		EXPECT_EQ(val4, 0x3FE6F);
+
 	}
 
 	TEST(WriteIntTest, Test1)
@@ -202,5 +212,15 @@ namespace PiSubmarine::RegUtils
 		ASSERT_EQ(bytes[2], 0);
 		ASSERT_EQ(bytes[3], 0);
 		ASSERT_EQ(bytes[4], 0);
+	}
+
+	TEST(RegisterTest, FieldAssignment)
+	{
+		constexpr uint8_t Offset = 3;
+		Register<Offset, 3> reg = std::array<uint8_t, 3>{ 1, 2, 3 };
+
+		Field<uint8_t, 0, 3, Access::ReadWrite, reg.GetSize()> field{ reg.GetRegisterByteArray()};
+
+		field = 0;
 	}
 }

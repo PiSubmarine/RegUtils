@@ -6,9 +6,26 @@
 #include <string.h>
 #include <bit>
 #include <vector>
+#include <algorithm>
 
 namespace PiSubmarine::RegUtils
 {
+
+	template<std::integral T>
+	constexpr T Byteswap(T value) noexcept
+	{
+#if !defined(__cpp_lib_byteswap)
+		static_assert(std::has_unique_object_representations_v<T>,
+			"T may not have padding bits");
+		auto value_representation = std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
+		std::ranges::reverse(value_representation);
+		return std::bit_cast<T>(value_representation);
+#else
+		return std::byteswap(value);
+#endif
+	}
+
+
 	template<typename T>
 	constexpr std::underlying_type_t<T> ToInt(T e)
 	{
@@ -55,47 +72,50 @@ namespace PiSubmarine::RegUtils
 		return static_cast<std::make_signed_t<T>>(unsignedValue);
 	}
 
-
-	template<typename T, size_t BytesNum>
-	constexpr T ReadIntInverseByteOrder(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
+	template<typename T, std::endian endianness = std::endian::native>
+	T ReadInt(const uint8_t* bytes, size_t Start, size_t Num)
 	{
 		T result = 0;
-		size_t byteMax = Num / 8;
 		for (size_t i = 0; i < Num; i++)
 		{
 			size_t bitIndex = Start + i;
 			size_t byteIndex = bitIndex / 8;
 			size_t bitIndexRem = bitIndex % 8;
-			if ((bytes[byteMax - byteIndex] & (1 << bitIndexRem)) != 0)
+			if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
 			{
 				result |= (1ULL << i);
 			}
 		}
+
+		if constexpr (endianness != std::endian::native)
+		{
+			result = Byteswap(result);
+		}
+
 		return result;
 	}
 
 	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr T ReadInt(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		if constexpr (endianness == std::endian::native)
+		T result = 0;
+		for (size_t i = 0; i < Num; i++)
 		{
-			T result = 0;
-			for (size_t i = 0; i < Num; i++)
+			size_t bitIndex = Start + i;
+			size_t byteIndex = bitIndex / 8;
+			size_t bitIndexRem = bitIndex % 8;
+			if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
 			{
-				size_t bitIndex = Start + i;
-				size_t byteIndex = bitIndex / 8;
-				size_t bitIndexRem = bitIndex % 8;
-				if ((bytes[byteIndex] & (1 << bitIndexRem)) != 0)
-				{
-					result |= (1ULL << i);
-				}
+				result |= (1ULL << i);
 			}
-			return result;
 		}
-		else
+
+		if constexpr (endianness != std::endian::native)
 		{
-			return ReadIntInverseByteOrder<T, BytesNum>(bytes, Start, Num);
+			result = Byteswap(result);
 		}
+
+		return result;
 	}
 
 	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
@@ -159,7 +179,7 @@ namespace PiSubmarine::RegUtils
 	template<typename T, size_t BytesNum>
 	constexpr void WriteIntInverseByteOrder(T value, std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
-		size_t byteMax = Num / 8;
+		size_t byteMax = (Start + Num) / 8;
 		for (size_t i = 0; i < Num; i++)
 		{
 			size_t bitIndex = Start + i;
@@ -380,24 +400,43 @@ namespace PiSubmarine::RegUtils
 		}
 	};
 
+	template<Access A>
+	concept IsReadable = (A == Access::Read);
+
+	template<Access A>
+	concept IsWritable = (A == Access::ReadWrite);
+
 	template<typename TFieldType, size_t Offset, size_t BitLength, Access Access, size_t RegisterSize, std::endian endianness = std::endian::native>
-	struct Field :
-		public std::conditional<
-		HasAnyFlag(Access, Access::ReadWrite),
-		FieldWritable<TFieldType, Offset, BitLength, RegisterSize, endianness>,
-		FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
-		>::type
+	struct Field
 	{
-		constexpr Field(std::array<uint8_t, RegisterSize>& data) :
-			std::conditional<
-			HasAnyFlag(Access, Access::ReadWrite),
-			FieldWritable<TFieldType, Offset, BitLength, RegisterSize, endianness>,
-			FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>
-			>::type(data)
+		constexpr Field(std::array<uint8_t, RegisterSize>& data) : RegisterData(data)
 		{
 
 		}
 
+		constexpr TFieldType Get() const requires IsReadable<Access>
+		{
+			return Read<TFieldType, RegisterSize, endianness>(RegisterData, Offset, BitLength);
+		}
 
+		constexpr operator TFieldType() const requires IsReadable<Access>
+		{
+			return FieldReadable<TFieldType, Offset, BitLength, RegisterSize, endianness>::Get();
+		}
+
+		void Set(TFieldType value) requires IsWritable<Access>
+		{
+			Write<TFieldType, RegisterSize, endianness>(value, RegisterData, Offset, BitLength);
+		}
+
+
+		Field& operator=(const TFieldType& value) requires IsWritable<Access>
+		{
+			Set(value);
+			return *this;
+		}
+
+	protected:
+		std::array<uint8_t, RegisterSize>& RegisterData;
 	};
 }
