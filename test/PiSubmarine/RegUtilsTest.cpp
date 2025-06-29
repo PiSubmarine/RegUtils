@@ -5,15 +5,15 @@ namespace PiSubmarine::RegUtils
 {
 	TEST(ReadIntTest, Native)
 	{
-		constexpr std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
+		std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
 
-		constexpr uint8_t val1 = ReadInt<uint8_t, 5>(bytes, 0, 4);
+		uint8_t val1 = ReadInt<uint8_t>(bytes.data(), 0, 4);
 		EXPECT_EQ(val1, 0b1000);
 
-		uint8_t val2 = ReadInt<uint8_t, 5>(bytes, 1, 5);
+		uint8_t val2 = ReadInt<uint8_t>(bytes.data(), 1, 5);
 		EXPECT_EQ(val2, 0b01100);
 
-		uint8_t val3 = ReadInt<uint8_t, 5>(bytes, 12, 6);
+		uint8_t val3 = ReadInt<uint8_t>(bytes.data(), 12, 6);
 		EXPECT_EQ(val3, 0b111010);
 	}
 
@@ -21,22 +21,22 @@ namespace PiSubmarine::RegUtils
 	{
 		constexpr std::array<uint8_t, 5> bytes{ 0xFF, 0xFF, 0xCD, 0x2C, 0xFF };
 
-		constexpr uint8_t val1 = ReadInt<uint8_t, bytes.size(), std::endian::big>(bytes, 24, 8);
+		uint8_t val1 = ReadInt<uint8_t, std::endian::big>(bytes.data(), 24, 8);
 		EXPECT_EQ(val1, 0x2C);
 
-		constexpr uint8_t val2a = ReadInt<uint8_t, bytes.size(), std::endian::little>(bytes, 25, 7);
+		uint8_t val2a = ReadInt<uint8_t, std::endian::little>(bytes.data(), 25, 7);
 		EXPECT_EQ(val2a, 22);
 
-		constexpr uint8_t val2b = ReadInt<uint8_t, bytes.size(), std::endian::big>(bytes, 25, 7);
+		uint8_t val2b = ReadInt<uint8_t, std::endian::big>(bytes.data(), 25, 7);
 		EXPECT_EQ(val2b, 22);
 
-		constexpr uint16_t val3a = ReadInt<uint16_t, bytes.size(), std::endian::big>(bytes, 16, 9);
+		uint16_t val3a = ReadInt<uint16_t, std::endian::big>(bytes.data(), 16, 9);
 		EXPECT_EQ(val3a, 0x01CD);
 
-		constexpr uint16_t val3b = ReadInt<uint16_t, bytes.size(), std::endian::little>(bytes, 16, 9);
+		uint16_t val3b = ReadInt<uint16_t, std::endian::little>(bytes.data(), 16, 9);
 		EXPECT_EQ(val3b, 0x1CD);
 
-		constexpr uint32_t val4 = ReadInt<uint32_t, 5, std::endian::big>(bytes, 9, 18);
+		uint32_t val4 = ReadInt<uint32_t, std::endian::big>(bytes.data(), 9, 18);
 		EXPECT_EQ(val4, 0x3FE6F);
 
 	}
@@ -45,7 +45,7 @@ namespace PiSubmarine::RegUtils
 	{
 		std::array<uint8_t, 5> bytes{ 0 };
 
-		WriteInt<uint8_t, 5>(0b11010110, bytes, 0, 4);
+		WriteInt<uint8_t>(0b11010110, bytes.data(), 0, 4);
 		EXPECT_EQ(bytes[0], 0b0110);
 	}
 
@@ -53,7 +53,7 @@ namespace PiSubmarine::RegUtils
 	{
 		std::array<uint8_t, 5> bytes{ 0 };
 
-		WriteInt<uint8_t, 5>(0b1101, bytes, 12, 4);
+		WriteInt<uint8_t>(0b1101, bytes.data(), 12, 4);
 		EXPECT_EQ(bytes[1], 0b11010000);
 	}
 
@@ -70,19 +70,14 @@ namespace PiSubmarine::RegUtils
 	{
 		std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
 
-		ReadEnumTestFlags val1 = ReadEnum<ReadEnumTestFlags, 5>(bytes, 0, 4);
+		ReadEnumTestFlags val1 = ReadEnum<ReadEnumTestFlags>(bytes.data(), 0, 4);
 		EXPECT_EQ(val1, ReadEnumTestFlags::Flag4);
 
-		ReadEnumTestFlags val2 = ReadEnum<ReadEnumTestFlags, 5>(bytes, 1, 5);
+		ReadEnumTestFlags val2 = ReadEnum<ReadEnumTestFlags>(bytes.data(), 1, 5);
 		EXPECT_EQ(val2, ReadEnumTestFlags::Flag3 | ReadEnumTestFlags::Flag4);
 
-		ReadEnumTestFlags val3 = ReadEnum<ReadEnumTestFlags, 5>(bytes, 12, 5);
+		ReadEnumTestFlags val3 = ReadEnum<ReadEnumTestFlags>(bytes.data(), 12, 5);
 		EXPECT_EQ(val3, ReadEnumTestFlags::Flag2 | ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5);
-	}
-
-	TEST(ReadEnumTest, TestInt)
-	{
-
 	}
 
 	TEST(WriteEnumTest, Test1)
@@ -90,16 +85,16 @@ namespace PiSubmarine::RegUtils
 		std::array<uint8_t, 5> bytes{ 0b10011000, 0b10100110, 0xFF, 0xFF, 0xFF };
 
 		ReadEnumTestFlags val1 = ReadEnumTestFlags::Flag2 | ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5;
-		WriteEnum<ReadEnumTestFlags, 5>(val1, bytes, 12, 5);
-		ReadEnumTestFlags val2 = ReadEnum<ReadEnumTestFlags, 5>(bytes, 12, 5);
+		WriteEnum<ReadEnumTestFlags>(val1, bytes.data(), 12, 5);
+		ReadEnumTestFlags val2 = ReadEnum<ReadEnumTestFlags>(bytes.data(), 12, 5);
 		EXPECT_EQ(val1, val2);
 	}
 
 	TEST(HasAllFlagsTest, ShouldBeTrue)
 	{
-		constexpr ReadEnumTestFlags val1 = ReadEnumTestFlags::Flag2 | ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5;
-		constexpr ReadEnumTestFlags val2 = ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5;
-		constexpr bool Result = HasAllFlags(val1, val2);
+		ReadEnumTestFlags val1 = ReadEnumTestFlags::Flag2 | ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5;
+		ReadEnumTestFlags val2 = ReadEnumTestFlags::Flag4 | ReadEnumTestFlags::Flag5;
+		bool Result = HasAllFlags(val1, val2);
 		EXPECT_TRUE(Result);
 	}
 
@@ -166,61 +161,4 @@ namespace PiSubmarine::RegUtils
 		EXPECT_TRUE(HasAnyFlag(val1, val2));
 	}
 
-	TEST(RegisterTest, ReadRegisterTest)
-	{
-		std::array<uint8_t, 49> byteArray{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		Register<3, 3> reg;
-		ReadRegister(reg, byteArray);
-		ASSERT_EQ(reg.GetRegisterByteArray()[0], 3);
-		ASSERT_EQ(reg.GetRegisterByteArray()[1], 4);
-		ASSERT_EQ(reg.GetRegisterByteArray()[2], 5);
-	}
-
-	TEST(RegisterTest, GetOffsetAndData8bits)
-	{
-		constexpr uint8_t Offset = 3;
-		Register<Offset, 3> reg = std::array<uint8_t, 3>{1, 2, 3};
-		auto bytes = reg.GetOffsetAndData();
-		ASSERT_EQ(bytes.size(), 4);
-		ASSERT_EQ(bytes[0], 3);
-		ASSERT_EQ(bytes[1], 1);
-		ASSERT_EQ(bytes[2], 2);
-		ASSERT_EQ(bytes[3], 3);
-	}
-
-	TEST(RegisterTest, GetOffsetAndData16bits)
-	{
-		constexpr uint16_t Offset = 0xABCD;
-		Register<Offset, 3> reg = std::array<uint8_t, 3>{ 1, 2, 3 };
-		auto bytes = reg.GetOffsetAndData();
-		ASSERT_EQ(bytes.size(), 5);
-		ASSERT_EQ(bytes[0], 0xAB);
-		ASSERT_EQ(bytes[1], 0xCD);
-		ASSERT_EQ(bytes[2], 1);
-		ASSERT_EQ(bytes[3], 2);
-		ASSERT_EQ(bytes[4], 3);
-	}
-
-	TEST(RegisterTest, RegisterIsZeroed)
-	{
-		constexpr uint16_t Offset = 0xABCD;
-		Register<Offset, 3> reg;
-		auto bytes = reg.GetOffsetAndData();
-		ASSERT_EQ(bytes.size(), 5);
-		ASSERT_EQ(bytes[0], 0xAB);
-		ASSERT_EQ(bytes[1], 0xCD);
-		ASSERT_EQ(bytes[2], 0);
-		ASSERT_EQ(bytes[3], 0);
-		ASSERT_EQ(bytes[4], 0);
-	}
-
-	TEST(RegisterTest, FieldAssignment)
-	{
-		constexpr uint8_t Offset = 3;
-		Register<Offset, 3> reg = std::array<uint8_t, 3>{ 1, 2, 3 };
-
-		Field<uint8_t, 0, 3, Access::ReadWrite, reg.GetSize()> field{ reg.GetRegisterByteArray()};
-
-		field = 0;
-	}
 }
