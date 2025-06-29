@@ -95,6 +95,14 @@ namespace PiSubmarine::RegUtils
 		return result;
 	}
 
+	template<typename T, std::endian endianness = std::endian::native>
+	T ReadEnum(const uint8_t* bytes, size_t Start, size_t Num)
+	{
+		using U = std::underlying_type_t<T>;
+		U result = ReadInt<U, endianness>(bytes, Start, Num);
+		return static_cast<T>(result);
+	}
+
 	template<typename T, size_t BytesNum, std::endian endianness = std::endian::native>
 	constexpr T ReadInt(const std::array<uint8_t, BytesNum>& bytes, size_t Start, size_t Num)
 	{
