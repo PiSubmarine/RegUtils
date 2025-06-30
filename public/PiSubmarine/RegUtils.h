@@ -47,6 +47,13 @@ namespace PiSubmarine::RegUtils
 	}
 
 	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
+	constexpr T operator ~(T A)
+	{
+		using U = std::underlying_type_t<T>;
+		return static_cast<T>(~static_cast<U>(A));
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
 	constexpr bool HasAllFlags(T A, T B)
 	{
 		return (A & B) == B;
