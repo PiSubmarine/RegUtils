@@ -25,10 +25,10 @@ namespace PiSubmarine::RegUtils
 		EXPECT_EQ(val1, 0x2C);
 
 		uint8_t val2a = ReadInt<uint8_t, std::endian::big>(bytes.data(), 25, 7);
-		EXPECT_EQ(val2a, 0x2C);
+		EXPECT_EQ(val2a, 22);
 
 		uint8_t val2b = ReadInt<uint8_t, std::endian::big>(bytes.data(), 25, 7);
-		EXPECT_EQ(val2b, 0x2C);
+		EXPECT_EQ(val2b, 22);
 
 		uint16_t val3a = ReadInt<uint16_t, std::endian::big>(bytes.data(), 16, 9);
 		EXPECT_EQ(val3a, 0x012C);

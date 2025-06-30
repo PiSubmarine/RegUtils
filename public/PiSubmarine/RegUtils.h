@@ -98,11 +98,13 @@ namespace PiSubmarine::RegUtils
 				bytesNum++;
 			}
 
-			const uint8_t* targetBytes = bytes + Start / 8;
+			size_t bitStart = Start % 8;
+			size_t byteStart = Start / 8;
+			const uint8_t* targetBytes = bytes + byteStart;
 
 			for (size_t i = 0; i < Num; i++)
 			{
-				size_t bitIndex = i;
+				size_t bitIndex = bitStart + i;
 				size_t byteIndex = bytesNum - bitIndex / 8 - 1;
 				size_t bitIndexRem = bitIndex % 8;
 				if ((targetBytes[byteIndex] & (1 << bitIndexRem)) != 0)
@@ -165,11 +167,13 @@ namespace PiSubmarine::RegUtils
 				bytesNum++;
 			}
 
-			uint8_t* targetBytes = bytes + Start / 8;
+			size_t bitStart = Start % 8;
+			size_t byteStart = Start / 8;
+			uint8_t* targetBytes = bytes + byteStart;
 
 			for (size_t i = 0; i < Num; i++)
 			{
-				size_t bitIndex = i;
+				size_t bitIndex = bitStart + i;
 				size_t byteIndex = bytesNum - bitIndex / 8 - 1;
 				size_t bitIndexRem = bitIndex % 8;
 				if ((value & (1ULL << i)) != 0)
