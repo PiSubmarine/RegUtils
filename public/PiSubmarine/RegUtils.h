@@ -205,7 +205,7 @@ namespace PiSubmarine::RegUtils
 
 	template<typename T, std::endian endianness = std::endian::native>
 		requires (!std::is_enum_v<T>)
-	constexpr void Write(T value, uint8_t* bytes, size_t Start, size_t Num)
+	void Write(T value, uint8_t* bytes, size_t Start, size_t Num)
 	{
 		WriteInt<T, endianness>(value, bytes, Start, Num);
 	}
