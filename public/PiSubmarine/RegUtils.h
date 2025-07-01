@@ -69,12 +69,6 @@ namespace PiSubmarine::RegUtils
 		return (A & B) != static_cast<T>(0);
 	}
 
-	template<typename T>
-	constexpr std::make_signed_t<T> ConvertTwosComplement(T unsignedValue) requires (std::is_unsigned_v<T>)
-	{
-		return static_cast<std::make_signed_t<T>>(unsignedValue);
-	}
-
 	template<typename T, std::endian endianness = std::endian::native>
 	T ReadInt(const uint8_t* bytes, size_t Start, size_t Num)
 	{
