@@ -70,12 +70,8 @@ namespace PiSubmarine::RegUtils
 	}
 
 	template<typename T>
-	constexpr std::make_signed_t<T> ConvertTwosComplement(T unsignedValue)
+	constexpr std::make_signed_t<T> ConvertTwosComplement(T unsignedValue) requires (std::is_unsigned_v<T>())
 	{
-		if (unsignedValue & (1 << (sizeof(T) * 8 - 1)))
-		{
-			unsignedValue |= (~0u << sizeof(T) * 8);
-		}
 		return static_cast<std::make_signed_t<T>>(unsignedValue);
 	}
 
