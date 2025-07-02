@@ -1,6 +1,6 @@
 #include "PiSubmarine/RegUtils.h"
 
-namespace PiSubmarine
+namespace PiSubmarine::RegUtils
 {
 	uint16_t ReadUint16LE(const uint8_t* bytes, size_t Start, size_t Num)
 	{
