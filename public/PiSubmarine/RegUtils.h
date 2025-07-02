@@ -69,8 +69,6 @@ namespace PiSubmarine::RegUtils
 		return (A & B) != static_cast<T>(0);
 	}
 
-	uint16_t ReadUint16LE(const uint8_t* bytes, size_t Start, size_t Num);
-
 	template<typename T, std::endian endianness = std::endian::native>
 	T ReadInt(const uint8_t* bytes, size_t Start, size_t Num)
 	{
@@ -137,8 +135,6 @@ namespace PiSubmarine::RegUtils
 	{
 		return ReadInt<T, endianness>(bytes, Start, Num);
 	}
-
-	void WriteUint16LE(uint16_t value, uint8_t* bytes, size_t Start, size_t Num);
 
 	template<typename T, std::endian endianness = std::endian::native>
 	void WriteInt(T value, uint8_t* bytes, size_t Start, size_t Num)
