@@ -2,7 +2,7 @@
 project("PiSubmarine.RegUtils")
 
 set(_build_cmake_url "https://raw.githubusercontent.com/PiSubmarine/Build.CMake/main/PiSubmarine.Build.CMake.cmake")
-set(_build_cmake_local "${CMAKE_SOURCE_DIR}/PiSubmarine.Build.CMake.cmake")
+set(_build_cmake_local "${CMAKE_BINARY_DIR}/PiSubmarine.Build.CMake.cmake")
 
 if(NOT EXISTS "${_build_cmake_local}")
     message(STATUS "Downloading ${_build_cmake_url}...")
