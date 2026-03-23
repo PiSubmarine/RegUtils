@@ -32,6 +32,24 @@ namespace PiSubmarine::RegUtils
 		return static_cast<std::underlying_type_t<T>>(e);
 	}
 
+#if 0
+	// Unsafe due to possible narrowing conversions
+	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>, typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
+	[[deprecated]] constexpr bool operator ==(T A, I B)
+	{
+		using U = std::underlying_type_t<T>;
+		return static_cast<U>(A) == static_cast<U>(B);
+	}
+#else
+
+	template<typename T>
+	constexpr bool operator ==(T A, std::underlying_type_t<T> B)
+	{
+		using U = std::underlying_type_t<T>;
+		return static_cast<U>(A) == static_cast<U>(B);
+	}
+#endif
+
 	template<typename T, typename = std::enable_if_t<std::is_enum_v<T>>>
 	constexpr T operator |(T A, T B)
 	{

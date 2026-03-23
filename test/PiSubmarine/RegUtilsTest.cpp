@@ -164,4 +164,20 @@ namespace PiSubmarine::RegUtils
 		EXPECT_TRUE(HasAnyFlag(val1, val2));
 	}
 
+	TEST(ComparisonTest, EnumIntEqual)
+	{
+		ReadEnumTestFlags val1 = ReadEnumTestFlags::Flag1 | ReadEnumTestFlags::Flag5;
+		auto val2 = static_cast<uint8_t>(val1);
+		EXPECT_TRUE(val1 != 0);
+		EXPECT_TRUE(val1 == val2);
+	}
+
+	TEST(ComparisonTest, IntEnumEqual)
+	{
+		ReadEnumTestFlags val1 = ReadEnumTestFlags::Flag1 | ReadEnumTestFlags::Flag5;
+		auto val2 = static_cast<uint8_t>(val1);
+		EXPECT_TRUE(val1 != 0);
+		EXPECT_TRUE(val2 == val1);
+	}
+
 }
