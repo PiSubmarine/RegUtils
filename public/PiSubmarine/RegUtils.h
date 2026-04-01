@@ -246,7 +246,7 @@ namespace PiSubmarine::RegUtils
     {
         using U = std::underlying_type_t<T>;
         U valueInt = static_cast<U>(value);
-        WriteInt(valueInt, bytes, Start, Num);
+        WriteInt<std::underlying_type_t<T>, endianness>(valueInt, bytes, Start, Num);
     }
 
     template <typename T, std::endian endianness = std::endian::native>
